@@ -3,6 +3,7 @@ import "./App.css";
 import * as tf from "@tensorflow/tfjs";
 import * as facemesh from "@tensorflow-models/face-landmarks-detection";
 import Webcam from "react-webcam";
+import { toast } from "react-toastify";
 import { drawMesh } from "./utilities";
 
 function App() {
@@ -16,12 +17,16 @@ function App() {
   const [webcam, setWebcam] = useState(true);
 
   const runFacemesh = async () => {
-    const net = await facemesh.load(
-      facemesh.SupportedPackages.mediapipeFacemesh
-    );
-    setInterval(() => {
-      detect(net);
-    }, 10);
+    try {
+      const net = await facemesh.load(
+        facemesh.SupportedPackages.mediapipeFacemesh
+      );
+      setInterval(() => {
+        detect(net);
+      }, 10);
+    } catch (e) {
+      alert("Check your network connection");
+    }
   };
 
   const detect = async (net) => {
@@ -45,6 +50,7 @@ function App() {
 
       // Make Detections
       const face = await net.estimateFaces({ input: video });
+      console.log("face", face);
 
       // Get canvas context
       const ctx = canvasRef.current.getContext("2d");
@@ -79,6 +85,8 @@ function App() {
     const blob = await res.blob();
 
     console.log(new File([blob], fileName, { type: "image/png" }));
+
+    setWebcam(false);
   };
 
   return (
